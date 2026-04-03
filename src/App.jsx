@@ -1,32 +1,38 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import './index.css'
 
-const INITIAL_TEMPLATES = [
-  { id: 1, name: 'Angry Cat', url: '/templates/angry_cat.jpg', emotion: 'angry' },
-  { id: 2, name: 'Confused Cat', url: '/templates/confused_cat.jpg', emotion: 'confused' },
-  { id: 3, name: 'Happy Cat', url: '/templates/happy_cat.jpg', emotion: 'happy' },
-  { id: 4, name: 'Chill Cat', url: '/templates/chill_cat.jpg', emotion: 'chill' },
-  { id: 5, name: 'Space Cat', url: '/templates/space_cat.jpg', emotion: 'space' },
-  { id: 6, name: 'Business Cat', url: '/templates/business_cat.jpg', emotion: 'business' },
-]
+// Templates are now loaded dynamically from public/templates.json at runtime.
+// Use 'npm run build' to regenerate this manifest.
 
 const EMOJIS = ['😂', '😍', '🤔', '🔥', '✨', '🐱', '🐾', '🌈', '🍕', '🎉', '💩', '🕶️']
 const FONTS = ['Impact', 'Arial', 'Courier New', 'Comic Sans MS', 'Georgia', 'Verdana']
 
 export default function App() {
+  const [templates, setTemplates] = useState([])
   const [currentPage, setCurrentPage] = useState('landing')
-  const [selectedTemplate, setSelectedTemplate] = useState(INITIAL_TEMPLATES[0])
+  const [selectedTemplate, setSelectedTemplate] = useState(null)
   const [filter, setFilter] = useState('all')
   const [textElements, setTextElements] = useState([
     { id: 't1', text: 'TOP TEXT', x: 250, y: 50, size: 40, color: '#ffffff', font: 'Impact', isDragging: false }
   ])
   const [activeId, setActiveId] = useState(null)
   const [history, setHistory] = useState([])
-
+  
   const canvasRef = useRef(null)
   const imageCache = useRef(new Image())
   const [inputText, setInputText] = useState('')
   const [isResizing, setIsResizing] = useState(false)
+
+  // Fetch templates from JSON
+  useEffect(() => {
+    fetch('/templates.json')
+      .then(res => res.json())
+      .then(data => {
+        setTemplates(data)
+        if (data.length > 0) setSelectedTemplate(data[0])
+      })
+      .catch(err => console.error("Error loading templates:", err))
+  }, [])
 
   // Handle Image Upload
   const handleUpload = (e) => {
@@ -240,8 +246,9 @@ export default function App() {
   }
 
   const randomMeme = () => {
+    if (templates.length === 0) return
     saveHistory()
-    const t = INITIAL_TEMPLATES[Math.floor(Math.random() * INITIAL_TEMPLATES.length)]
+    const t = templates[Math.floor(Math.random() * templates.length)]
     setSelectedTemplate(t)
     const captions = ["I don't care", "Is it Friday yet?", "Who did this?", "Bruh...", "Explain your smallness"]
     const cap = captions[Math.floor(Math.random() * captions.length)]
@@ -257,7 +264,7 @@ export default function App() {
     }
   }
 
-  const filteredTemplates = filter === 'all' ? INITIAL_TEMPLATES : INITIAL_TEMPLATES.filter(t => t.emotion === filter)
+  const filteredTemplates = filter === 'all' ? templates : templates.filter(t => t.emotion === filter)
 
   if (currentPage === 'landing') {
     return (
@@ -280,7 +287,7 @@ export default function App() {
         <section className="template-selection">
           <h2>Popular Templates</h2>
           <div className="template-grid-large">
-            {INITIAL_TEMPLATES.map(t => (
+            {templates.map(t => (
               <div key={t.id} className="template-card-large" onClick={() => {
                 setSelectedTemplate(t)
                 setCurrentPage('editor')
@@ -291,6 +298,7 @@ export default function App() {
                 </div>
               </div>
             ))}
+            {templates.length === 0 && <p>No templates found. Add images to public/templates/ and run build!</p>}
           </div>
         </section>
       </div>
