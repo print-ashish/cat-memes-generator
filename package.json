@@ -4,10 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "predev": "node scripts/generate-templates.js",
+    "dev": "npm run predev && vite",
+    "prebuild": "node scripts/generate-templates.js",
+    "build": "npm run prebuild && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "npm run prebuild && vite preview"
   },
   "dependencies": {
     "react": "^19.2.4",
