@@ -235,6 +235,7 @@ canvas {
   cursor: crosshair;
   background-color: #111;
   display: block;
+  touch-action: none;
 }
 
 .emoji-grid {

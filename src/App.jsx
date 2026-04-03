@@ -350,10 +350,12 @@ export default function App() {
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
               onTouchStart={(e) => {
+                if (e.cancelable) e.preventDefault()
                 const touch = e.touches[0]
                 handleMouseDown({ clientX: touch.clientX, clientY: touch.clientY })
               }}
               onTouchMove={(e) => {
+                if (e.cancelable) e.preventDefault()
                 const touch = e.touches[0]
                 handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY })
               }}
